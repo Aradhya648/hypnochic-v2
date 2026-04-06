@@ -20,6 +20,11 @@ window.CameraManager = (function () {
         HandTracker.init(video);
         // Signal that camera + MediaPipe are wired up — scene can now start
         window.dispatchEvent(new Event('hypnochic-ready'));
+      })
+      .catch(function () {
+        // Camera denied → trigger fallback so keyboard/mouse still work
+        window.dispatchEvent(new Event('hypnochic-fallback'));
+        window.dispatchEvent(new Event('hypnochic-ready'));
       });
   }
 

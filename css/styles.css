@@ -93,6 +93,47 @@ html, body {
   pointer-events: none;
 }
 
+#fps-counter {
+  position: absolute;
+  top: 0.6rem;
+  left: 0.8rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #53d996;
+  letter-spacing: 0.1em;
+  background: rgba(0,0,0,0.55);
+  padding: 4px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+#controls-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  color: #666;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+  background: rgba(0,0,0,0.35);
+  padding: 6px 16px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+#controls-hint span {
+  display: inline-block;
+  color: #a78bfa;
+  background: rgba(124,58,237,0.15);
+  padding: 1px 7px;
+  border-radius: 4px;
+  margin: 0 2px;
+  font-weight: 600;
+}
+
 @keyframes fadeOut {
   from { opacity: 1; }
   to   { opacity: 0; }
@@ -140,4 +181,19 @@ html, body {
 
 #allow-btn:active {
   transform: scale(0.98);
+}
+
+#fallback-banner {
+  display: none;
+  position: absolute;
+  top: 0.6rem;
+  right: 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: #1b1b2f;
+  color: #888;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.08em;
+  pointer-events: none;
 }

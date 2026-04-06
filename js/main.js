@@ -5,19 +5,41 @@
   var modeEl;
 
   var MODES = {
-    point:     { label: '⊳  REPEL',     color: '#a78bfa' },
-    palm:      { label: '✦  ATTRACT',   color: '#ec4899' },
-    fist:      { label: '◉  SHOCKWAVE', color: '#ff6400' },
-    'fist-hold':{ label: '◉  SHOCKWAVE', color: '#ff6400' },
-    pinch:     { label: '✺  EXPLODE',   color: '#ffffff' },
-    none:      { label: '',             color: '#555'    }
+    point:     { label: '⊳  REPEL',     color: '#a78bfa', key: '1' },
+    palm:      { label: '✦  ATTRACT',   color: '#ec4899', key: '2' },
+    fist:      { label: '◉  SHOCKWAVE', color: '#ff6400', key: '3' },
+    'fist-hold':{ label: '◉  SHOCKWAVE', color: '#ff6400', key: '3' },
+    pinch:     { label: '✺  EXPLODE',   color: '#ffffff', key: '4' },
+    none:      { label: '',             color: '#555', key: '' }
   };
 
+  // ── Fallback input (keyboard + mouse) ──
+  var fallback = false;          // true when camera denied
+  var mouseDown = false;
+  var mouseX = 0, mouseY = 0;
+  var fallbackMode = 'point';    // current mode key: '1'-'4'
+  var shakeCooldown = 0;
+  var explodeCooldown = 0;
+
+  // ── FPS counter state ──
+  var fpsFrames = 0;
+  var fpsElapsed = 0;
+  var fpsDisplay = 0;
+  var fpsVisible = false;
+  var fpsEl;
+
   document.addEventListener('DOMContentLoaded', function () {
+    fpsEl = document.getElementById('fps-counter');
     modeEl = document.getElementById('gesture-mode');
 
     document.getElementById('allow-btn').addEventListener('click', function () {
       CameraManager.requestPermission();
+    });
+
+    // Camera denied → enable fallback
+    window.addEventListener('hypnochic-fallback', function () {
+      fallback = true;
+      if (fpsEl) fpsEl.style.display = 'block';
     });
 
     window.addEventListener('hypnochic-ready', function () {
@@ -32,6 +54,79 @@
         requestAnimationFrame(loop);
       }
     });
+
+    // ── Keyboard controls ──
+    document.addEventListener('keydown', function (e) {
+      var key = e.key.toLowerCase();
+      var objects = ObjectManager.getObjects();
+
+      if (key === 'f') {
+        fpsVisible = !fpsVisible;
+        if (fpsEl) fpsEl.style.display = fpsVisible ? 'block' : 'none';
+        return;
+      }
+
+      if (key === 'r') {
+        for (var i = 0; i < objects.length; i++) {
+          var o = objects[i];
+          o.mesh.position.set(o.basePosition.x, o.basePosition.y, o.basePosition.z);
+          o.velocity = { x: 0, y: 0, z: 0 };
+          o.rotationSpeed.x *= 0.1;
+          o.rotationSpeed.y *= 0.1;
+        }
+        return;
+      }
+
+      if (key >= '1' && key <= '4') {
+        fallbackMode = ['point','palm','fist','pinch'][parseInt(key) - 1];
+        setModeUI(fallbackMode);
+        return;
+      }
+    });
+
+    // ── Mouse controls ──
+    var canvas = document.getElementById('hypnochic-canvas');
+    canvas.addEventListener('mousedown', function (e) { mouseDown = true; });
+    canvas.addEventListener('mouseup',   function ()  { mouseDown = false; });
+    canvas.addEventListener('mouseleave',function ()  { mouseDown = false; });
+    canvas.addEventListener('mousemove', function (e) {
+      if (!mouseDown || !fallback) return;
+
+      var x = (e.clientX / window.innerWidth  - 0.5) * 16;
+      var y = -(e.clientY / window.innerHeight - 0.5) * 10;
+      var position = { x: x, y: y, z: 0 };
+
+      var objects = ObjectManager.getObjects();
+
+      if (fallbackMode === 'point') {
+        PhysicsEngine.applyRepulsion(objects, [position]);
+      } else if (fallbackMode === 'palm') {
+        PhysicsEngine.applyAttraction(objects, position);
+      }
+    });
+
+    // Touch support (mobile)
+    canvas.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      mouseDown = true;
+    }, { passive: false });
+    canvas.addEventListener('touchend', function () { mouseDown = false; });
+    canvas.addEventListener('touchmove', function (e) {
+      if (!mouseDown || !fallback) return;
+      e.preventDefault();
+      var touch = e.touches[0];
+      var x = (touch.clientX / window.innerWidth  - 0.5) * 16;
+      var y = -(touch.clientY / window.innerHeight - 0.5) * 10;
+      var position = { x: x, y: y, z: 0 };
+
+      var objects = ObjectManager.getObjects();
+
+      if (fallbackMode === 'point') {
+        PhysicsEngine.applyRepulsion(objects, [position]);
+      } else if (fallbackMode === 'palm') {
+        PhysicsEngine.applyAttraction(objects, position);
+      }
+    }, { passive: false });
   });
 
   function setModeUI(type) {
@@ -49,17 +144,32 @@
     var deltaTime = Math.min((timestamp - lastTime) / 1000, 0.05);
     lastTime = timestamp;
 
+    // FPS
+    fpsFrames++;
+    fpsElapsed += deltaTime;
+    if (fpsElapsed >= 0.5) {
+      fpsDisplay = Math.round(fpsFrames / fpsElapsed);
+      fpsFrames = 0;
+      fpsElapsed = 0;
+      if (fpsEl) fpsEl.textContent = fpsDisplay + ' FPS';
+    }
+
     var handData = HandTracker.getHandData();
     var objects  = ObjectManager.getObjects();
+    var gesture = null;
 
-    // Detect gesture for this frame
-    var gesture = GestureDetector.detect(handData);
-    setModeUI(gesture.type);
+    if (!fallback && handData.isTracked) {
+      // Camera mode — use MediaPipe
+      gesture = GestureDetector.detect(handData);
+      setModeUI(gesture.type);
+      HandTracker.draw(gesture.type);
+    } else if (fallback) {
+      gesture = { type: fallbackMode, position: null, raw: null };
+      setModeUI(fallbackMode);
+    } else {
+      gesture = { type: 'none', position: null, raw: null };
+    }
 
-    // Draw skeleton + cursor on 2D canvas overlay
-    HandTracker.draw(gesture.type);
-
-    // Physics based on gesture
     if (gesture.position) {
       if (gesture.type === 'point') {
         PhysicsEngine.applyRepulsion(objects, [gesture.position]);
@@ -71,7 +181,6 @@
 
       if (gesture.type === 'fist') {
         PhysicsEngine.applyShockwave(objects, gesture.position);
-        // Visual ring on the canvas
         if (gesture.raw) HandTracker.addRing(gesture.raw, '#ff6400');
       }
 
@@ -81,7 +190,6 @@
       }
     }
 
-    // Standard physics pass every frame
     PhysicsEngine.applyDamping(objects);
     PhysicsEngine.applyBoundaries(objects);
     PhysicsEngine.applyReturnForce(objects);
