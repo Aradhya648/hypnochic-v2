@@ -1,4 +1,3 @@
-/* ─── gestures.js ─── */
 window.GestureDetector = (function () {
 
   var pinchCooldown  = 0;
@@ -15,6 +14,12 @@ window.GestureDetector = (function () {
   // Is a finger extended? tip.y noticeably above mcp.y (raw 0-1 coords, y increases downward)
   function isExtended(lms, tipIdx, mcpIdx) {
     return lms[tipIdx].y < lms[mcpIdx].y - 0.04;
+  }
+
+  // Thumb extended? tip above IP by threshold
+  function isThumbExtended(lms) {
+    // landmark 4 (thumb tip) should be above (lower y) than landmark 3 (thumb IP)
+    return lms[4].y < lms[3].y - 0.03;
   }
 
   function dist2D(a, b) {
@@ -71,6 +76,24 @@ window.GestureDetector = (function () {
         type: 'point',
         position: { x: (raw[8].x-0.5)*16, y: -(raw[8].y-0.5)*10, z: 0 },
         raw: raw[8]
+      };
+    }
+
+    // ── Peace sign: index + middle extended, ring & pinky closed ──
+    if (extIndex && extMiddle && !extRing && !extPinky) {
+      return {
+        type: 'peace',
+        position: { x: (raw[8].x-0.5)*16, y: -(raw[8].y-0.5)*10, z: 0 },
+        raw: raw[8]
+      };
+    }
+
+    // ── Thumbs up: thumb extended, other fingers closed ──
+    if (isThumbExtended(raw) && !extIndex && !extMiddle && !extRing && !extPinky) {
+      return {
+        type: 'thumbsup',
+        position: { x: (raw[4].x-0.5)*16, y: -(raw[4].y-0.5)*10, z: 0 },
+        raw: raw[4]
       };
     }
 

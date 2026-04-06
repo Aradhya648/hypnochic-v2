@@ -10,6 +10,8 @@
     fist:      { label: '◉  SHOCKWAVE', color: '#ff6400', key: '3' },
     'fist-hold':{ label: '◉  SHOCKWAVE', color: '#ff6400', key: '3' },
     pinch:     { label: '✺  EXPLODE',   color: '#ffffff', key: '4' },
+    peace:     { label: '❄️  FREEZE',   color: '#00bcd4' },
+    thumbsup:  { label: '⚡ BOOST',    color: '#ffeb3b' },
     none:      { label: '',             color: '#555', key: '' }
   };
 
@@ -23,6 +25,11 @@
   var effectsActive = { bloom: true, chromatic: true };
   var SCENE_MODES = ['default','cosmic','zen','chaos'];
   var sceneModeIndex = 0;
+
+  // Post-processing and gesture effect state
+  var bloomPass = null;
+  var freezeUntil = 0;
+  var bloomBoostUntil = 0;
 
   // ── FPS counter state ──
   var fpsFrames = 0;
@@ -49,6 +56,7 @@
 
     window.addEventListener('hypnochic-ready', function () {
       SceneManager.init();
+      bloomPass = SceneManager.getBloomPass();
       ObjectManager.init(SceneManager.getScene());
       SceneManager.applySceneMode('default'); // ensure correct color palette
       ParticleSystem.init(SceneManager.getScene());
@@ -224,11 +232,39 @@
         ParticleSystem.triggerExplosion(gesture.position.x, gesture.position.y, gesture.position.z);
         if (gesture.raw) HandTracker.addRing(gesture.raw, '#ffffff');
       }
+
+      if (gesture.type === 'peace') {
+        freezeUntil = timestamp + 1000; // 1 second freeze
+      }
+
+      if (gesture.type === 'thumbsup') {
+        PhysicsEngine.applyShockwave(objects, gesture.position);
+        bloomBoostUntil = timestamp + 1500; // 1.5 seconds
+      }
     }
 
     PhysicsEngine.applyDamping(objects);
     PhysicsEngine.applyBoundaries(objects);
     PhysicsEngine.applyReturnForce(objects);
+
+    // Freeze effect: zero velocities if active
+    if (timestamp < freezeUntil) {
+      for (var i = 0; i < objects.length; i++) {
+        objects[i].velocity = { x: 0, y: 0, z: 0 };
+        objects[i].rotationSpeed.x *= 0.9;
+        objects[i].rotationSpeed.y *= 0.9;
+        objects[i].rotationSpeed.z *= 0.9;
+      }
+    }
+
+    // Bloom boost
+    if (bloomPass) {
+      if (timestamp < bloomBoostUntil) {
+        bloomPass.strength = 2.0;
+      } else {
+        bloomPass.strength = 1.2;
+      }
+    }
 
     ObjectManager.update();
     ParticleSystem.update(deltaTime);
