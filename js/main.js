@@ -17,9 +17,10 @@
   var fallback = false;          // true when camera denied
   var mouseDown = false;
   var mouseX = 0, mouseY = 0;
-  var fallbackMode = 'point';    // current mode key: '1'-'4'
+  var fallbackMode = 'point';
   var shakeCooldown = 0;
   var explodeCooldown = 0;
+  var effectsActive = { bloom: true, chromatic: true };
 
   // ── FPS counter state ──
   var fpsFrames = 0;
@@ -40,6 +41,8 @@
     window.addEventListener('hypnochic-fallback', function () {
       fallback = true;
       if (fpsEl) fpsEl.style.display = 'block';
+      var hint = document.getElementById('controls-hint');
+      if (hint) hint.style.display = 'block';
     });
 
     window.addEventListener('hypnochic-ready', function () {
@@ -73,6 +76,24 @@
           o.velocity = { x: 0, y: 0, z: 0 };
           o.rotationSpeed.x *= 0.1;
           o.rotationSpeed.y *= 0.1;
+        }
+        return;
+      }
+
+      if (key === 'b') {
+        var chroma = SceneManager.getChromatic();
+        if (chroma) {
+          effectsActive.chromatic = !effectsActive.chromatic;
+          chroma.enabled = effectsActive.chromatic;
+        }
+        return;
+      }
+
+      if (key === 'c' || key === 'C') {
+        var bloom = SceneManager.getBloomPass();
+        if (bloom) {
+          effectsActive.bloom = !effectsActive.bloom;
+          bloom.enabled = effectsActive.bloom;
         }
         return;
       }

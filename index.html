@@ -11,6 +11,11 @@
 
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Post-processing (EffectComposer, BloomPass, ShaderPass) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
   <!-- MediaPipe -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -27,7 +32,7 @@
     <div id="gesture-mode"></div>
     <div id="fps-counter" style="display:none">0 FPS</div>
     <div id="controls-hint" style="display:none">
-      Keys: <span>1</span> Repel · <span>2</span> Attract · <span>3</span> Blast · <span>4</span> Explode · <span>F</span> FPS · <span>R</span> Reset
+      Keys: <span>1</span> Repel · <span>2</span> Attract · <span>3</span> Blast · <span>4</span> Explode · <span>F</span> FPS · <span>B</span> Chromatic · <span>C</span> Bloom · <span>R</span> Reset
     </div>
   </div>
 
