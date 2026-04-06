@@ -65,6 +65,7 @@ If camera is denied or unavailable:
 | **2** | Attract mode |
 | **3** | Shockwave |
 | **4** | Explosion |
+| **M** | Cycle scene mode (Default → Cosmic → Zen → Chaos) |
 | **R** | Reset all objects to initial positions |
 | **F** | Toggle FPS counter |
 

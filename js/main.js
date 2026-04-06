@@ -21,6 +21,8 @@
   var shakeCooldown = 0;
   var explodeCooldown = 0;
   var effectsActive = { bloom: true, chromatic: true };
+  var SCENE_MODES = ['default','cosmic','zen','chaos'];
+  var sceneModeIndex = 0;
 
   // ── FPS counter state ──
   var fpsFrames = 0;
@@ -48,6 +50,7 @@
     window.addEventListener('hypnochic-ready', function () {
       SceneManager.init();
       ObjectManager.init(SceneManager.getScene());
+      SceneManager.applySceneMode('default'); // ensure correct color palette
       ParticleSystem.init(SceneManager.getScene());
       GestureDetector.init();
 
@@ -94,6 +97,18 @@
         if (bloom) {
           effectsActive.bloom = !effectsActive.bloom;
           bloom.enabled = effectsActive.bloom;
+        }
+        return;
+      }
+
+      if (key === 'm') {
+        sceneModeIndex = (sceneModeIndex + 1) % SCENE_MODES.length;
+        var modeName = SCENE_MODES[sceneModeIndex];
+        SceneManager.applySceneMode(modeName);
+        var ind = document.getElementById('mode-indicator');
+        if (ind) {
+          ind.textContent = modeName.toUpperCase();
+          ind.style.display = 'block';
         }
         return;
       }

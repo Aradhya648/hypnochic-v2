@@ -197,3 +197,19 @@ html, body {
   letter-spacing: 0.08em;
   pointer-events: none;
 }
+
+#mode-indicator {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.8rem;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #a78bfa;
+  letter-spacing: 0.1em;
+  background: rgba(0,0,0,0.55);
+  padding: 4px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+  text-transform: uppercase;
+}
