@@ -25,7 +25,8 @@ function checkout(items: CartItem[], rules: DiscountRule[]): CartSummary {
   for (const item of items) {
     const slug = slugify(item.name);
     const lineTotal = item.price * item.quantity;
-    const discount = calculateDiscount(lineTotal, rules);
+    const rate = rules.reduce((best, r) => item.quantity >= r.minQuantity && r.percentage > best ? r.percentage : best, 0);
+    const discount = calculateDiscount(lineTotal, rate);
     subtotal += lineTotal - discount;
     lineItems.push(`${slug}: ${formatPrice(lineTotal)} - ${formatPrice(discount)} discount`);
   }
