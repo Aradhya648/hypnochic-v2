@@ -41,3 +41,5 @@ function checkout(items: CartItem[], rules: DiscountRule[]): CartSummary {
 const summary = checkout(products, discountRules);
 console.log(summary.lineItems.join("\n"));
 console.log(`Subtotal: ${summary.subtotal} (${summary.itemCount} items)`);
+
+// v2
