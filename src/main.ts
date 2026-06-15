@@ -1,4 +1,4 @@
-import { formatPrice, slugify, calculateDiscount } from './utils';
+import { formatPrice, slugify, calculateDiscount, applyTaxRate } from './utils';
 import { validateCart, CartSummary } from './validators';
 import { CartItem, DiscountRule } from './types';
 
@@ -43,4 +43,5 @@ const summary = checkout(products, discountRules);
 console.log(summary.lineItems.join("\n"));
 console.log(`Subtotal: ${summary.subtotal} (${summary.itemCount} items)`);
 
-// v2
+const taxResult = applyTaxRate(summary.subtotal, "IN");
+console.log(`Tax: ${formatPrice(taxResult.tax)}, Total: ${formatPrice(taxResult.total)}`);
