@@ -44,5 +44,5 @@ const summary = checkout(products, discountRules);
 console.log(summary.lineItems.join("\n"));
 console.log(`Subtotal: ${summary.subtotal} (${summary.itemCount} items)`);
 
-const taxResult = applyTaxRate(summary.rawSubtotal, "IN");
+const taxResult = applyTaxRate(summary.subtotal, "IN");
 console.log(`Tax: ${formatPrice(taxResult.tax)}, Total: ${formatPrice(taxResult.total)}`);
