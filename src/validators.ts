@@ -3,6 +3,7 @@ import { CartItem } from './types';
 export interface CartSummary {
   lineItems: string[];
   subtotal: string;
+  rawSubtotal: number;
   itemCount: number;
   valid: boolean;
 }
