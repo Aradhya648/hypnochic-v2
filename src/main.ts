@@ -34,6 +34,7 @@ function checkout(items: CartItem[], rules: DiscountRule[]): CartSummary {
   return {
     lineItems,
     subtotal: formatPrice(subtotal),
+    rawSubtotal: subtotal,
     itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
     valid: true,
   };
@@ -43,5 +44,5 @@ const summary = checkout(products, discountRules);
 console.log(summary.lineItems.join("\n"));
 console.log(`Subtotal: ${summary.subtotal} (${summary.itemCount} items)`);
 
-const taxResult = applyTaxRate(summary.subtotal, "IN");
+const taxResult = applyTaxRate(summary.rawSubtotal, "IN");
 console.log(`Tax: ${formatPrice(taxResult.tax)}, Total: ${formatPrice(taxResult.total)}`);
